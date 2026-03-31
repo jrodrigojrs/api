@@ -18,6 +18,9 @@ export async function seedUsers(prisma: PrismaClient) {
         name: 'Admin',
         email: adminEmail,
         password: hashedPassword,
+        pin: '1234',
+        role: 'ADMIN',
+        active: true,
       },
     });
 

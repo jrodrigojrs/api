@@ -14,6 +14,7 @@ export class UsersService {
   async findAll(): Promise<SafeUser[]> {
     const users = await this.prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
+      select: { id: true, name: true, email: true },
     });
 
     return users.map((user) => this.removePassword(user));
@@ -87,7 +88,7 @@ export class UsersService {
   }
 
   // 🔒 REMOVE PASSWORD (tipado)
-  private removePassword(user: CreateUserDto): SafeUser {
+  private removePassword(user: Omit<CreateUserDto, 'password'>): SafeUser {
     return user;
   }
 }

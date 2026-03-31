@@ -9,13 +9,23 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(uuid())
-  name     String
-  email    String @unique
-  password String
-
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  active    Boolean  @default(true)
+  pin       String?
+  role      String   @default("USER")
 
   @@map("users")
+}
+
+enum Role {
+  USER
+  REQUESTER
+  APPROVER
+  CHECKER
+  ADMIN
 }
