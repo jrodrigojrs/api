@@ -3,7 +3,9 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@users/*": ["src/users/*"],
+      "@usersdto/*": ["src/users/dto/*"]
     },
     "resolvePackageJsonExports": true,
     "esModuleInterop": true,
