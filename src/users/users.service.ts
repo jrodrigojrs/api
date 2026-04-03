@@ -1,16 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { UserDto } from './dto/user.dto.js';
 import { UpdateUserDto } from './dto/updateUser.dto.js';
+import { UserDto, UserRole } from './dto/user.dto.js';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<UserDto[]> {
+  async findAll(): Promise<Omit<UserDto, 'password' | 'pin'>[]> {
     return this.prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
   }
 
@@ -33,23 +42,47 @@ export class UsersService {
     return user;
   }
 
+  async findEmail(email: string): Promise<UserDto> {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
   async update(id: string, data: UpdateUserDto) {
-    try {
-      if (data.password) {
-        data.password = await bcrypt.hash(data.password, 10);
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+
+    if (data.pin) {
+      data.pin = await bcrypt.hash(data.pin, 10);
+    }
+
+    if (data.role) {
+      const role = data.role.toUpperCase();
+
+      if (!Object.values(UserRole).includes(role as UserRole)) {
+        throw new NotFoundException('Invalid role');
       }
 
-      if (data.pin) {
-        data.pin = await bcrypt.hash(data.pin, 10);
-      }
+      data.role = role as UserRole;
+    }
 
+    const isUser = await this.findOne(id); // Check if user exists
+
+    if (isUser) {
       return await this.prisma.user.update({
         where: { id },
         data,
       });
-    } catch {
-      throw new NotFoundException('User not found');
     }
+
+    throw new NotFoundException('User not found');
   }
 
   async remove(id: string) {

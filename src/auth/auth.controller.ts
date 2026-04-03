@@ -1,21 +1,14 @@
-// auth.controller.ts
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
-
 import { SignInDto } from './dto/signin.dto.js';
-import { SignUpDto } from './dto/signup.dto.js';
 
-@Controller('auth') // rota base: /auth
+@Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signin')
-  signin(@Body() data: SignInDto) {
-    return this.authService.signin(data);
-  }
-
-  @Post('signup')
-  signup(@Body() data: SignUpDto) {
-    return this.authService.signup(data);
+  @HttpCode(HttpStatus.OK) // Retorna 200 OK em vez de 201 Created
+  async signin(@Body() { email, password }: SignInDto) {
+    return await this.authService.signIn(email, password);
   }
 }
